@@ -1,3 +1,59 @@
+function addListeners() {
+    const btns = Array.from(document.querySelectorAll(".buttons"));
+    btns.forEach(btn => btn.addEventListener('click', setKey));
+    btns.forEach(btn => btn.addEventListener('keydown', setKey));
+}
+
+function setKey(e) {
+    let key = e.target.innerHTML;  
+    if (key == "=") { // if =, checks for valid equation, then moves to math 
+        let equation = document.getElementById("displayText").innerHTML;
+        if (equation[equation.length - 1] == " ") {
+            return; // if last of display is an operator, does nothing
+        } else {  // if last of display is number, checks for operators
+            checkForOperators(equation); 
+        }
+    } else { // sends key to be updated on display
+         updateDisplay(key); 
+    }
+}
+
+// runs through on "=" key to make sure operators are in display before sortOperations
+function checkForOperators(equation) {
+    let opCheck = false; 
+    for (let i = 0; i < equation.length; i++) {
+        if (isNaN(equation.charAt(i)) 
+               && equation.charAt(i) != "." 
+               && equation.charAt(i) != " "){
+            opCheck = true; 
+            break; 
+        }
+    }
+    if (opCheck == false) {
+        return; 
+    }
+    sortOperations(equation.split(" ")); 
+}
+
+function updateDisplay(key) {
+    let equation = document.getElementById("displayText").innerHTML;
+    if (clearOrDeleteDisplay(key, equation)) {
+        return;
+    } else if (equation === "0" && !isNaN(key) && key != ".") { 
+        // if key is number, replaces 0 w/ key or adds decimal behind 0
+        document.getElementById("displayText").innerHTML = key; 
+    } else if (isNaN(key) && key != ".") {
+        if (equation[equation.length-1] == " ") {
+            equation = equation.slice(0, -3); // if last is operator, deletes it and spaces
+                                              // to replace with new operator
+        }
+        // adds operator to display and w/ spacing
+        document.getElementById("displayText").innerHTML = equation + " " + key + " "; 
+    } else {   // adds number or decimal to end of display
+        document.getElementById("displayText").innerHTML = equation + key;  
+    }
+}
+
 // if key was clear or del, resets display to 0 or
 // checks if last char in display is number or operator then removes it w/ del
 function clearOrDeleteDisplay(key, equation) {
@@ -7,7 +63,7 @@ function clearOrDeleteDisplay(key, equation) {
     } else if (key == "Del") {	
         if (equation.length == 1) {
             equation = 0; // checks if display is 1 number, then sets to 0
-        } else if (isNaN(equation[equation.length-1]) || equation[equation.length-1] == " "){
+        } else if (equation[equation.length-1] == " "){
             // checks if last of display is operator and removes it and spaces
             equation = equation.slice(0, -3);
         } else {
@@ -19,55 +75,6 @@ function clearOrDeleteDisplay(key, equation) {
     } 
 }
 
-function updateDisplay(key) {
-    let equation = document.getElementById("displayText").innerHTML
-    if (clearOrDeleteDisplay(key, equation)) {
-        return;
-    } else if (equation == 0 && !isNaN(key)) { // makes display number for first char
-        document.getElementById("displayText").innerHTML = key; 
-    } else if (isNaN(key)) { // adds operator to display
-        if (isNaN(equation[equation.length-1]) || equation[equation.length-1] == " ") {
-            equation = equation.slice(0, -3); // if last is operator, 
-                                              // deletes it to make room for new operator
-        }
-        document.getElementById("displayText").innerHTML = equation + " " + key + " "; 
-    } else {   // adds number to end of display
-        document.getElementById("displayText").innerHTML = equation + key;  
-    }
-}
-
-function setKey(e) {
-    let key = e.target.innerHTML;  
-    if (key == "=") { // if =, checks for valid equation, then moves to math 
-        let equation = document.getElementById("displayText").innerHTML.replace(/\s/g, '')
-        if (isNaN(equation[equation.length - 1])) {
-            return; // if last of display is an operator, does nothing
-        } else {  // if last of display is number, checks for operators
-            checkForOperators(equation); 
-        }
-    } else { // sends key to be updated on display
-         updateDisplay(key); 
-    }
-}
-
-function addListeners() {
-    const btns = Array.from(document.querySelectorAll(".buttons"));
-    btns.forEach(btn => btn.addEventListener('click', setKey));
-    btns.forEach(btn => btn.addEventListener('keydown', setKey));
-}
-
-function doMath(aNum, operator, bNum) {
-    if (operator == "+") {
-        return +aNum + +bNum; 
-    } else if (operator == "-") {
-        return aNum - bNum; 
-    } else if (operator == "*") {
-        return aNum * bNum; 
-    } else {
-        return aNum / bNum; 
-    }
-}
-let counter = 0; 
 function sortOperations(text) {
     let temp = []; 
     let next = []; 
@@ -90,6 +97,9 @@ function sortOperations(text) {
         }
         temp.push(text[i]); 
     }
+
+    // after all * and ÷ have been calculated, does + and -. 
+    // compares array at end of previous and moves to new array
     if (!temp.includes("÷") && !temp.includes("*")){
         for (let i = 0; i < temp.length; i++) {
             if (temp[i] == "+" || temp[i] == "-") {
@@ -106,6 +116,8 @@ function sortOperations(text) {
         }
     }
 
+    // if next = 1, should move straight to pushing to display, otherwise
+    // calls sortOperations again depending on what array was left off 
     if (temp.length > 1 && next.length != 1) {
         if (next.length > 1) {
             sortOperations(next); 
@@ -121,19 +133,20 @@ function sortOperations(text) {
     }
 }
 
-// runs through on "=" key to make sure operators are in display before sortOperations
-function checkForOperators(equation) {
-    let opCheck = false; 
-    for (let i = 0; i < equation.length; i++) {
-        if (isNaN(equation.charAt(i))) {
-            opCheck = true; 
-            break; 
+function doMath(aNum, operator, bNum) {
+    if (operator == "+") {
+        return +aNum + +bNum; 
+    } else if (operator == "-") {
+        return aNum - bNum; 
+    } else if (operator == "*") {
+        return aNum * bNum; 
+    } else {
+        if (aNum == 0) {
+            return "Cannot divide by 0"; 
+        } else {
+            return aNum / bNum; 
         }
     }
-    if (opCheck == false) {
-        return; 
-    }
-    sortOperations(document.getElementById("displayText").innerHTML.split(" ")); 
 }
 
 // initializes all listeners
