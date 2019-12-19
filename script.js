@@ -1,4 +1,3 @@
-
 // if key was clear or del, resets display to 0 or
 // checks if last char in display is number or operator then removes it w/ del
 function clearOrDeleteDisplay(key, equation) {
@@ -43,8 +42,8 @@ function setKey(e) {
         let equation = document.getElementById("displayText").innerHTML.replace(/\s/g, '')
         if (isNaN(equation[equation.length - 1])) {
             return; // if last of display is an operator, does nothing
-        } else {  // if last of display is number, checks for/sorts operators
-            sortOperations(equation); 
+        } else {  // if last of display is number, checks for operators
+            checkForOperators(equation); 
         }
     } else { // sends key to be updated on display
          updateDisplay(key); 
@@ -65,41 +64,76 @@ function doMath(aNum, operator, bNum) {
     } else if (operator == "*") {
         return aNum * bNum; 
     } else {
-        console.log("supposedly division");
         return aNum / bNum; 
     }
 }
+let counter = 0; 
+function sortOperations(text) {
+    let temp = []; 
+    let next = []; 
+    let num;  
 
-function sortOperations(displayText) {
-    if (checkForOperators(displayText)) {  
-        return; // returns if no operators are found
-    }
-    let t = "   " + displayText + "   ";  
-    let temp = " "; 
-    let num; 
-    for (let i = 0; i < displayText.length + 6; i++) {
-        if (t[i] == "*" || t[i] == "÷") {
-            num = doMath(t[i-1], t[i], t[i+1])
-            temp += " " + t.slice(0, i-1) + num + t.slice(i+2);
+    // iterates through each in array checking for * or ÷
+    // if it finds one, it passes nums next to operator to do math
+    // then pushes new number to array in place of first number and skips over pushing 
+    // operator and other digit. if no * or ÷ is found, pushes everything to temp
+    for (let i = 0; i < text.length; i++) {
+        if (text[i] == "*" || text[i] == "÷") {
+            num = doMath(text[i-1], text[i], text[i+1]);
+            temp[i-1] = num; 
+            if (text.length > 3) {
+                for (let j = i + 2; j < text.length; j++) {
+                temp.push(text[j]); 
+                }
+            }
+            break; 
         }
-        if (i > displayText.length + 6) {
+        temp.push(text[i]); 
+    }
+    if (!temp.includes("÷") && !temp.includes("*")){
+        for (let i = 0; i < temp.length; i++) {
+            if (temp[i] == "+" || temp[i] == "-") {
+                num = doMath(temp[i-1], temp[i], temp[i+1]); 
+                next[i-1] = num; 
+                if (temp.length > 3) {
+                    for (let j = i + 2; j < temp.length; j++) {
+                    next.push(temp[j]); 
+                    }
+                }
+                break; 
+            }
+            next.push(temp[i]); 
+        }
+    }
+
+    if (temp.length > 1 && next.length != 1) {
+        if (next.length > 1) {
+            sortOperations(next); 
+        } else {
+            sortOperations(temp);
+        }
+    } else if (temp.length == 1 || next.length == 1) {
+        if (next.length == 1) {
+            document.getElementById("displayText").innerHTML = next;
+        } else {
+            document.getElementById("displayText").innerHTML = temp;
+        }
+    }
+}
+
+// runs through on "=" key to make sure operators are in display before sortOperations
+function checkForOperators(equation) {
+    let opCheck = false; 
+    for (let i = 0; i < equation.length; i++) {
+        if (isNaN(equation.charAt(i))) {
+            opCheck = true; 
             break; 
         }
     }
-    document.getElementById("displayText").innerHTML = temp.replace(/\s/g, '');
-}
-
-// runs through on "=" key to make sure operators are in display before doing math
-function checkForOperators(displayText) {
-    let opCheck = false; 
-    for (let i = 0; i < displayText.length; i++) {
-        if (isNaN(displayText.charAt(i))) {
-            opCheck = true; 
-        }
-    }
     if (opCheck == false) {
-        return false; 
+        return; 
     }
+    sortOperations(document.getElementById("displayText").innerHTML.split(" ")); 
 }
 
 // initializes all listeners
