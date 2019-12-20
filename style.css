@@ -68,10 +68,10 @@ button:focus {outline: none;}
 
 
 
-[data-key = "button0"] {
+[data-key = "96"] {
     border-radius: 0em 0em 0em 0.5em;
 }
 
-[data-key = "buttonPlus"] {
+[data-key = "107"] {
     border-radius: 0em 0em 0.5em 0em;
 }

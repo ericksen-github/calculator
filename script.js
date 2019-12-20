@@ -1,11 +1,21 @@
 function addListeners() {
     const btns = Array.from(document.querySelectorAll(".buttons"));
-    btns.forEach(btn => btn.addEventListener('click', setKey));
-    btns.forEach(btn => btn.addEventListener('keydown', setKey));
+    btns.forEach(btn => btn.addEventListener('click', clickKey));
+
+    document.onkeydown = function(e) {
+        setKey(e.keyCode); // gets keycode of key pressed which matches element id
+    };
+}
+
+function clickKey(e) {
+    setKey(e.target.id); // gets id of clicked event and passes to setKey
 }
 
 function setKey(e) {
-    let key = e.target.innerHTML;  
+    if (document.getElementById(e) == null || document.getElementById("displayText").innerHTML.length > 19) {
+        return; // stops errors from non-calculator keyboard presses
+    }
+    let key = document.getElementById(e).innerHTML;
     if (key == "=") { // if =, checks for valid equation, then moves to math 
         let equation = document.getElementById("displayText").innerHTML;
         if (equation[equation.length - 1] == " ") {
@@ -61,8 +71,8 @@ function clearOrDeleteDisplay(key, equation) {
         document.getElementById("displayText").innerHTML = 0; 
         return true; 
     } else if (key == "Del") {	
-        if (equation.length == 1) {
-            equation = 0; // checks if display is 1 number, then sets to 0
+        if (equation.length == 1 || equation == "Cannot divide by 0" || equation == "Infinity") {
+            equation = 0; // checks if display is 1 number or error, then sets to 0
         } else if (equation[equation.length-1] == " "){
             // checks if last of display is operator and removes it and spaces
             equation = equation.slice(0, -3);
@@ -149,5 +159,5 @@ function doMath(aNum, operator, bNum) {
     }
 }
 
-// initializes all listeners
+// initialized events for click/keydown
 addListeners();
