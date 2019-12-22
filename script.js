@@ -13,7 +13,7 @@ function clickKey(e) {
 
 function setKey(e) {
     if (document.getElementById(e) == null || document.getElementById("displayText").innerHTML.length > 19) {
-        return; // stops errors from non-calculator keyboard presses
+        return; // stops errors from non-calculator keyboard presses or the display being too long
     }
     let key = document.getElementById(e).innerHTML;
     if (key == "=") { // if =, checks for valid equation, then moves to math 

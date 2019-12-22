@@ -31,9 +31,9 @@ body {
     font-size: 1.5em;
 }
 
-#blank {
+#blank2 {
     background-color:rgb(253, 253, 253);
-    width: 180px; 
+    width: 90px; 
     height: 80px; 
     float: left; 
 }
@@ -52,7 +52,20 @@ body {
 }
 
 .buttons:hover {
+    background-color:rgb(226, 225, 225);
+}
+
+.notNum, #blank1 {
+    font-family: 'Times New Roman', Times, serif; 
+    font-weight:400;
+    font-size: 1.5em;
     background-color:rgb(240, 240, 240);
+    width: 90px; 
+    height: 80px; 
+    float: left; 
+    text-align: center;
+    line-height: 80px;
+    color: rgba(32, 32, 32, 0.637); 
 }
 
 button, input {
