@@ -1,3 +1,5 @@
+let equalsPressed = false; 
+
 function addListeners() {
     const btns = Array.from(document.querySelectorAll(".buttons"));
     btns.forEach(btn => btn.addEventListener('click', clickKey));
@@ -16,7 +18,7 @@ function setKey(e) {
         return; // stops errors from non-calculator keyboard presses or the display being too long
     }
     let key = document.getElementById(e).innerHTML;
-    if (key == "=") { // if =, checks for valid equation, then moves to math 
+    if (key == "=") { // if = begins check for valid equation, then moves to math 
         let equation = document.getElementById("displayText").innerHTML;
         if (equation[equation.length - 1] == " ") {
             return; // if last of display is an operator, does nothing
@@ -32,9 +34,7 @@ function setKey(e) {
 function checkForOperators(equation) {
     let opCheck = false; 
     for (let i = 0; i < equation.length; i++) {
-        if (isNaN(equation.charAt(i)) 
-               && equation.charAt(i) != "." 
-               && equation.charAt(i) != " "){
+        if (isNaN(equation.charAt(i)) && equation.charAt(i) != " " && equation.charAt(i) != "."){
             opCheck = true; 
             break; 
         }
@@ -59,8 +59,16 @@ function updateDisplay(key) {
         }
         // adds operator to display and w/ spacing
         document.getElementById("displayText").innerHTML = equation + " " + key + " "; 
-    } else {   // adds number or decimal to end of display
-        document.getElementById("displayText").innerHTML = equation + key;  
+        equalsPressed = false;  
+    } else if (key == "."){
+        checkDecimal(key, equation);   
+    } else {   // adds number to end of display 
+        if (equalsPressed == true) {
+            document.getElementById("displayText").innerHTML = key; 
+            equalsPressed = false;  
+        } else {
+            document.getElementById("displayText").innerHTML = equation + key;  
+        }
     }
 }
 
@@ -83,6 +91,35 @@ function clearOrDeleteDisplay(key, equation) {
         document.getElementById("displayText").innerHTML = equation; 
         return true; 
     } 
+}
+
+// checks for decimals between end of equation and the last operator input
+function checkDecimal(key, equation) {
+    let len = equation.length; 
+    let sliced = ""; 
+
+    if (equation.includes(" ")) {
+        for (i = len - 1; i >= 0; i--) {
+            if (equation[i] == " ") {
+                sliced = equation.slice(i); 
+                break; 
+            }
+        }
+    }
+    if (sliced.includes(".")) {
+        return; 
+    }
+    if (equalsPressed == true) {
+        document.getElementById("displayText").innerHTML = "0" + key;  
+        equalsPressed = false;  
+    } else {
+        if (equation[equation.length -1] == " ") {
+            document.getElementById("displayText").innerHTML = equation + "0" + key;
+        } else {
+            document.getElementById("displayText").innerHTML = equation + key; 
+        }
+         
+    }
 }
 
 function sortOperations(text) {
@@ -136,9 +173,11 @@ function sortOperations(text) {
         }
     } else if (temp.length == 1 || next.length == 1) {
         if (next.length == 1) {
-            document.getElementById("displayText").innerHTML = next;
+            equalsPressed = true; 
+            document.getElementById("displayText").innerHTML = parseFloat(next[0].toFixed(5));
         } else {
-            document.getElementById("displayText").innerHTML = temp;
+            document.getElementById("displayText").innerHTML = parseFloat(temp[0].toFixed(5));
+            equalsPressed = true; 
         }
     }
 }
